@@ -74,10 +74,17 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
         }
         wght=abs(wght);
         string wt=to_string(wght);
-        weight[0]=stoi(&wt[0]);
-        weight[1]=stoi(&wt[1]);
-        weight[2]=stoi(&wt[2]);
-        weight[3]=stoi(&wt[3]);
+        char c=wt[0];
+        weight[0]=stoi(&c);
+        c=wt[1];
+        weight[1]=stoi(&c);
+        c=wt[2];
+        weight[2]=stoi(&c);
+        c=wt[3];
+        weight[3]=stoi(&c);
+        //lck.lock();
+        //cout<<weight[0]<<" "<<weight[1]<<" "<<weight[2]<<" "<<weight[3]<<endl;
+        //lck.unlock();
     }
     lin.close();
     //training active learning model based the paramters above
@@ -197,10 +204,14 @@ void get_past_results(){
                 getline(pin,line);
                 string wght=extract_num(line);
                 vector<int> wt;
-                wt.push_back(stoi(&wght[0]));
-                wt.push_back(stoi(&wght[1]));
-                wt.push_back(stoi(&wght[2]));
-                wt.push_back(stoi(&wght[3]));
+                char c=wght[0];
+                wt.push_back(stoi(&c));
+                c=wght[1];
+                wt.push_back(stoi(&c));
+                c=wght[2];
+                wt.push_back(stoi(&c));
+                c=wght[3];
+                wt.push_back(stoi(&c));
                 toAdd.weight=wt;
                 getline(pin,line);
                 toAdd.isActive=(bool)stoi(extract_num(line).c_str());
