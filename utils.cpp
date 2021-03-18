@@ -3,6 +3,7 @@
 #include <iostream>
 using namespace std;
 
+
 void test(model mod, CSVReader src){
     string out_file="";
     if (gIsActiveOptimization){
@@ -164,4 +165,50 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
         lout.close();
     }
     delete csvr;
+}
+
+string extract_num(string raw){
+    string ans="";
+    bool isNum=false;
+    for (char c: raw){
+        if (isNum){
+            ans=ans+c;
+        }
+        if (c=='='){
+            isNum=true;
+        }
+    }
+    return ans;
+}
+
+void get_past_results(){
+    ifstream pin("params.txt");
+    if (pin.good()){
+        string line="";
+        while (getline(pin,line)){
+            if (line=="Model tested:"){
+                trial_log toAdd;
+                getline(pin,line);
+                toAdd.exp=stoi(extract_num(line).c_str());
+                getline(pin,line);
+                toAdd.init_step=stoi(extract_num(line).c_str());
+                getline(pin,line);
+                toAdd.step=stoi(extract_num(line).c_str());
+                getline(pin,line);
+                string wght=extract_num(line);
+                vector<int> wt;
+                wt.push_back(stoi(&wght[0]));
+                wt.push_back(stoi(&wght[1]));
+                wt.push_back(stoi(&wght[2]));
+                wt.push_back(stoi(&wght[3]));
+                toAdd.weight=wt;
+                getline(pin,line);
+                toAdd.isActive=(bool)stoi(extract_num(line).c_str());
+                getline(pin,line);
+                toAdd.avg_precision=stof(extract_num(line).c_str());
+                trials.push_back(toAdd);
+            }
+        }
+    }
+    pin.close();
 }
