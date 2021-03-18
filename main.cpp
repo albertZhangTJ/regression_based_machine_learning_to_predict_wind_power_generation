@@ -20,6 +20,7 @@ using namespace std;
 
 int main(){
     vector<string> filepath={"T1.csv"};
+    get_past_results();
     vector<int> sz={10,25,50,100};
     vector<int> isz={500,1000,2000};
     vector<int> exp={2,3,4};
