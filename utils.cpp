@@ -87,15 +87,17 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
         //lck.unlock();
     }
     lin.close();
+    
+    //training active learning model based the paramters above
+    model mod(csvr,exp);
+    mod.initialize(init_step);
+    for (int i=init_step;i<csvr->data->size()-400;i+=step){
+        mod.train(step);
+    }
+
     //training active learning model based the paramters above
     //exhaustively examine through all combinations of weight that are deemed to be appropriate
     while (!examinedActive && increment(weight)){
-        //train the model
-        model mod(csvr,exp);
-        mod.initialize(init_step);
-        for (int i=init_step;i<csvr->data->size()-400;i+=step){
-            mod.train(step);
-        }
         //test the model && add the results to the log
         vector<float> residual;
         Test t=csvr->getTestData();
@@ -133,17 +135,18 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
     if (!examinedActive){
         weight={0,1,1,1};
     }
+
+    model rmod(csvr,exp);
+    rmod.setRandom();
+    rmod.initialize(init_step);
+    for (int i=init_step;i<csvr->data->size()-400;i+=step){
+        rmod.train(step);
+    }
     while (increment(weight)){
-        model mod(csvr,exp);
-        mod.setRandom();
-        mod.initialize(init_step);
-        for (int i=init_step;i<csvr->data->size()-400;i+=step){
-            mod.train(step);
-        }
         vector<float> residual;
         Test t=csvr->getTestData();
         for (size_t i=0;i<t.test.size();i++){
-            residual.push_back(t.ans[i]-mod.estimate(t.test[i],weight));
+            residual.push_back(t.ans[i]-rmod.estimate(t.test[i],weight));
         }
         float res_sum=0,abs_sum=0;
         for (float f: residual){
