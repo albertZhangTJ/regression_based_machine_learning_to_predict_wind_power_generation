@@ -153,7 +153,7 @@ void CSVReader::recycle(){
     for (vector<float> datum: *data){
         used_data->push_back(datum);
     }
-    data->clear();
+    delete data;
     for (vector<float> datum: *test_data){
         used_data->push_back(datum);
     }
