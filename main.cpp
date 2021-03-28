@@ -20,10 +20,10 @@ using namespace std;
 
 int main(){
     vector<string> filepath={"T1.csv"};
-    get_past_results();
-    vector<int> sz={10,25,50,100};
-    vector<int> isz={500,1000,2000};
-    vector<int> exp={2,3,4};
+    
+    vector<int> sz={100,50,25,10};
+    vector<int> isz={2000,1000,500};
+    vector<int> exp={4,3,2};
     vector<thread> workers;
     for (int size:sz){
         for (int init_size:isz){
@@ -41,58 +41,71 @@ int main(){
         th.join();
     }
 
+    get_past_results();
     trial_log active_min;
     active_min.avg_precision=100000; //a large enough random number to start with
     trial_log random_min;
     random_min.avg_precision=100000; //same as above
     for (trial_log t: trials){
-        if (t.isActive && t.avg_precision<active_min.avg_precision){
+        if (t.isActive && abs(t.avg_precision)<abs(active_min.avg_precision)){
             active_min=t;
         }
-        else if (!t.isActive && t.avg_precision<random_min.avg_precision){
+        else if (!t.isActive && abs(t.avg_precision)<abs(random_min.avg_precision)){
             random_min=t;
         }
     }
-    dout<<endl<<endl;
+    cout<<endl<<endl;
     gexp=active_min.exp;
     gweight=active_min.weight;
     ginit_step=active_min.init_step;
     gstep=active_min.step;
     gIsActiveOptimization=true;
-    dout<<"Active optimization: "<<endl<<"    exp="<<gexp<<endl;
-    dout<<"    step="<<gstep<<endl<<"    init_step="<<ginit_step<<endl;
-    dout<<"    weight="<<gweight[0]<<gweight[1]<<gweight[2]<<gweight[3]<<endl;
+    cout<<"Active optimization: "<<endl<<"    exp="<<gexp<<endl;
+    cout<<"    step="<<gstep<<endl<<"    init_step="<<ginit_step<<endl;
+    cout<<"    weight="<<gweight[0]<<gweight[1]<<gweight[2]<<gweight[3]<<endl;
+    cout<<flush;
+
+    //save time by skipping disk IO and directly copying from memory
     CSVReader csvr(filepath,0.8);
+    CSVReader scsvr=csvr;
+    CSVReader tcsvr=csvr;
+    CSVReader fcsvr=csvr;
+
+
 
     model act(&csvr);
     act.initialize(ginit_step);
+    cout<<csvr.data->size()<<endl<<flush;
     test(act,csvr);
-    csvr.recycle();
+    cout<<csvr.data->size()<<"    "<<csvr.used_data->size()<<"    "<<csvr.test_data->size()<<endl<<flush;
+    cout<<"First model tested"<<endl<<flush;
+    cout<<"data recycled"<<endl<<flush;
 
-    model rnd(&csvr);
+
+    model rnd(&scsvr);
     rnd.setRandom();
     rnd.initialize(ginit_step);
-    test(rnd,csvr);
-    csvr.recycle();
+    cout<<"second model initialized"<<endl<<flush;
+    test(rnd,scsvr);
 
     gexp=random_min.exp;
     gweight=random_min.weight;
     ginit_step=random_min.init_step;
     gstep=random_min.step;
     gIsActiveOptimization=false;
-    dout<<"Random optimization: "<<endl<<"    exp="<<gexp<<endl;
-    dout<<"    step="<<gstep<<endl<<"    init_step="<<ginit_step<<endl;
-    dout<<"    weight="<<gweight[0]<<gweight[1]<<gweight[2]<<gweight[3]<<endl;
-
-    model sact(&csvr);
+    cout<<"Random optimization: "<<endl<<"    exp="<<gexp<<endl;
+    cout<<"    step="<<gstep<<endl<<"    init_step="<<ginit_step<<endl;
+    cout<<"    weight="<<gweight[0]<<gweight[1]<<gweight[2]<<gweight[3]<<endl;
+    cout<<flush;
+    
+    model sact(&tcsvr);
     sact.initialize(ginit_step);
-    test(sact,csvr);
-    csvr.recycle();
+    test(sact,tcsvr);
 
-    model srnd(&csvr);
+    model srnd(&fcsvr);
     srnd.setRandom();
     srnd.initialize(ginit_step);
-    test(srnd,csvr);
+    test(srnd,fcsvr);
 
     return 0;
 }
