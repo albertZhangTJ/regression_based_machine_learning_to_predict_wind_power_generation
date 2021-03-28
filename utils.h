@@ -10,5 +10,6 @@ bool increment(vector<int>& src);
 void adjust_param(int step, int init_step, int exp, CSVReader *csvr);
 string extract_num(string raw);
 void get_past_results();
+void partial_test(model mod, CSVReader src, int index);
 
 #endif

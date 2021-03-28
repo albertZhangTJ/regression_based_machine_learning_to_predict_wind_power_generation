@@ -114,6 +114,18 @@ double model::estimate(vector<float> features, vector<int> weight){
     return ans_sum/weight_sum;
 }
 
+double model::partial_estimate(vector<float> feature, vector<int> weight){
+    double ans_sum=0;
+    int weight_sum=0;
+    for (size_t i=0;i<dims->size();i++){
+        if (weight[i]>0){
+            ans_sum+=(*dims)[i].estimate(feature[i])*weight[i];
+            weight_sum+=weight[i];
+        }
+    }
+    return ans_sum/weight_sum;
+}
+
 model::~model(){
     this->dims->clear();
 }

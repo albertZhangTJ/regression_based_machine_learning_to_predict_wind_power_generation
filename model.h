@@ -19,6 +19,9 @@ class model{
         void setRandom();
         double estimate(vector<float> features);
         double estimate(vector<float> features, vector<int> weight);
+        //when estimating using an incomplete feature vector, set the weight for the missing digit to a negative number
+        //in that case, that digit won't be considered
+        double partial_estimate(vector<float> features, vector<int> weight);
         ~model();
 };
 
