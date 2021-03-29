@@ -38,6 +38,46 @@ void test(model mod, CSVReader src){
         out<<i<<"    "<<res_sum/t.test.size()<<"    "<<abs_sum/t.test.size()<<"    "<<endl;
     }
 }
+
+void partial_test(model mod, CSVReader src, int index){
+    int cache=gweight[index];
+    gweight[index]=-1;
+    string out_file=""+index;
+    if (gIsActiveOptimization){
+        if (mod.isActive){
+            out_file="act_result_p.txt";
+        }
+        else {
+            out_file="rnd_result_p.txt";
+        }
+    }
+    else {
+        if (mod.isActive){
+            out_file="act_result_r_p.txt";
+        }
+        else {
+            out_file="rnd_result_r_p.txt";
+        }
+    }
+    ofstream out(out_file);
+    for (size_t i=ginit_step;i<src.data->size()-200;i+=gstep){
+        vector<float> residual;
+        mod.train(gstep);
+        Test t=src.getTestData();
+        for (size_t i=0;i<t.test.size();i++){
+            residual.push_back(t.ans[i]-mod.partial_estimate(t.test[i]));
+        }
+        float res_sum=0,abs_sum=0;
+        for (float f: residual){
+            res_sum+=f;
+            abs_sum+=abs(f);
+        }
+        out<<i<<"    "<<res_sum/t.test.size()<<"    "<<abs_sum/t.test.size()<<"    "<<endl;
+    }
+    //restore the value stored in gweight
+    gweight[index]=cache;
+}
+
 bool increment(vector<int>& src){
     src[0]+=1;
     for (int i=0;i<2;i++){
