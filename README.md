@@ -6,6 +6,7 @@ The project can self-adjust the parameters to achieve the best precision (determ
 
 ## compiling
 g++ -std=c++11 -pthread *.cpp -o model -static
+
 compiling with qmake with -pthread flag might provide better performance
 
 ## running
