@@ -42,7 +42,7 @@ void test(model mod, CSVReader src){
 void partial_test(model mod, CSVReader src, int index){
     int cache=gweight[index];
     gweight[index]=-1;
-    string out_file=""+index;
+    string out_file=""+to_string(index);
     if (gIsActiveOptimization){
         if (mod.isActive){
             out_file="act_result_p.txt";

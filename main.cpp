@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <random>
 #include <thread>
+#include <pthread.h>
 #include <mutex>
 #include "CSVReader.h"
 #include "structs.h"
@@ -70,6 +71,10 @@ int main(){
     CSVReader scsvr=csvr;
     CSVReader tcsvr=csvr;
     CSVReader fcsvr=csvr;
+    CSVReader acsvr=csvr;
+    CSVReader bcsvr=csvr;
+    CSVReader ccsvr=csvr;
+    CSVReader dcsvr=csvr;
 
 
 
@@ -81,12 +86,24 @@ int main(){
     cout<<"First model tested"<<endl<<flush;
     cout<<"data recycled"<<endl<<flush;
 
+    model pact(&acsvr);
+    act.initialize(ginit_step);
+    cout<<acsvr.data->size()<<endl<<flush;
+    partial_test(pact,acsvr,2);
+    cout<<acsvr.data->size()<<"    "<<acsvr.used_data->size()<<"    "<<acsvr.test_data->size()<<endl<<flush;
+    cout<<"First model partial tested"<<endl<<flush;
+    cout<<"data recycled"<<endl<<flush;
 
     model rnd(&scsvr);
     rnd.setRandom();
     rnd.initialize(ginit_step);
     cout<<"second model initialized"<<endl<<flush;
     test(rnd,scsvr);
+
+    model prnd(&bcsvr);
+    prnd.setRandom();
+    prnd.initialize(ginit_step);
+    partial_test(prnd,bcsvr,2);
 
     gexp=random_min.exp;
     gweight=random_min.weight;
@@ -102,10 +119,19 @@ int main(){
     sact.initialize(ginit_step);
     test(sact,tcsvr);
 
+    model psact(&ccsvr);
+    psact.initialize(ginit_step);
+    partial_test(psact,ccsvr,2);
+
     model srnd(&fcsvr);
     srnd.setRandom();
     srnd.initialize(ginit_step);
     test(srnd,fcsvr);
+
+    model psrnd(&dcsvr);
+    psrnd.setRandom();
+    psrnd.initialize(ginit_step);
+    partial_test(psrnd,dcsvr,2);
 
     return 0;
 }
