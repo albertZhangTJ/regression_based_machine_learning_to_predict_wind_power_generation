@@ -22,25 +22,25 @@ using namespace std;
 int main(){
     vector<string> filepath={"T1.csv"};
     
-    vector<int> sz={100,50,25,10};
-    vector<int> isz={2000,1000,500};
-    vector<int> exp={4,3,2};
-    vector<thread> workers;
-    for (int size:sz){
-        for (int init_size:isz){
-            for (int po: exp){
-                //actually the desktop we plan to train this model on only supports 8 threads
-                //thus it might seems more reasonable to use at most 16 threads
-                //but I didn't do so for code simplicity (although a thread pool seems neat)
-                CSVReader *csvr=new CSVReader(filepath,0.8);
-                thread toAdd(adjust_param, size, init_size, po, csvr);
-                workers.push_back(move(toAdd));
-            }
-        }
-    }
-    for (auto& th: workers){
-        th.join();
-    }
+//    vector<int> sz={100,50,25,10};
+//    vector<int> isz={2000,1000,500};
+//    vector<int> exp={4,3,2};
+//    vector<thread> workers;
+//    for (int size:sz){
+//        for (int init_size:isz){
+//            for (int po: exp){
+//                //actually the desktop we plan to train this model on only supports 8 threads
+//                //thus it might seems more reasonable to use at most 16 threads
+//                //but I didn't do so for code simplicity (although a thread pool seems neat)
+//                CSVReader *csvr=new CSVReader(filepath,0.8);
+//                thread toAdd(adjust_param, size, init_size, po, csvr);
+//                workers.push_back(move(toAdd));
+//            }
+//        }
+//    }
+//    for (auto& th: workers){
+//        th.join();
+//    }
 
     get_past_results();
     trial_log active_min;
@@ -68,13 +68,13 @@ int main(){
 
     //save time by skipping disk IO and directly copying from memory
     CSVReader csvr(filepath,0.8);
-    CSVReader scsvr=csvr;
-    CSVReader tcsvr=csvr;
-    CSVReader fcsvr=csvr;
-    CSVReader acsvr=csvr;
-    CSVReader bcsvr=csvr;
-    CSVReader ccsvr=csvr;
-    CSVReader dcsvr=csvr;
+    CSVReader scsvr(filepath,0.8);
+    CSVReader tcsvr(filepath,0.8);
+    CSVReader fcsvr(filepath,0.8);
+    CSVReader acsvr(filepath,0.8);
+    CSVReader bcsvr(filepath,0.8);
+    CSVReader ccsvr(filepath,0.8);
+    CSVReader dcsvr(filepath,0.8);
 
 
 
