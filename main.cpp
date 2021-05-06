@@ -22,25 +22,27 @@ using namespace std;
 int main(){
     vector<string> filepath={"T1.csv"};
     
-   vector<int> sz={100,50,25,10};
-   vector<int> isz={2000,1000,500};
-   vector<int> exp={4,3,2};
-   vector<thread> workers;
-   for (int size:sz){
+    vector<int> sz={100,50,25,10};
+    vector<int> isz={2000,1000,500};
+    vector<int> exp={4,3,2};
+    vector<thread> workers;
+    for (int size:sz){
        for (int init_size:isz){
-           for (int po: exp){
-               //actually the desktop we plan to train this model on only supports 8 threads
-               //thus it might seems more reasonable to use at most 16 threads
-               //but I didn't do so for code simplicity (although a thread pool seems neat)
-               CSVReader *csvr=new CSVReader(filepath,0.8);
-               thread toAdd(adjust_param, size, init_size, po, csvr);
-               workers.push_back(move(toAdd));
-           }
-       }
-   }
-   for (auto& th: workers){
-       th.join();
-   }
+            for (int po: exp){
+                //actually the desktop we plan to train this model on only supports 8 threads
+                //thus it might seems more reasonable to use at most 16 threads
+                //but I didn't do so for code simplicity (although a thread pool seems neat)
+                CSVReader *csvr=new CSVReader(filepath,0.8);
+                thread toAdd(adjust_param, size, init_size, po, csvr);
+                workers.push_back(move(toAdd));
+            }
+        }
+    }
+    for (auto& th: workers){
+        th.join();
+    }
+
+
 
     get_past_results();
     trial_log active_min;
