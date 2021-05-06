@@ -155,7 +155,7 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
         log.init_step=init_step;
         log.isActive=true;
         log.step=step;
-        log.avg_precision=res_sum/t.test.size();
+        log.avg_precision=abs_sum/t.test.size();
         csvr->recycle();
         lck.lock();
         cout<<"Model tested:"<<endl<<"    exp="<<exp<<endl<<"    init_step="<<init_step<<endl<<"    step="<<step<<endl;
@@ -199,7 +199,7 @@ void adjust_param(int step, int init_step, int exp, CSVReader *csvr){
         log.init_step=init_step;
         log.isActive=false;
         log.step=step;
-        log.avg_precision=res_sum/t.test.size();
+        log.avg_precision=abs_sum/t.test.size();
         csvr->recycle();
         lck.lock();
         cout<<"Model tested:"<<endl<<"    exp="<<exp<<endl<<"    init_step="<<init_step<<endl<<"    step="<<step<<endl;
