@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <random>
 #include <thread>
+#include <pthread.h>
 #include <mutex>
 #include "CSVReader.h"
 #include "structs.h"
@@ -21,25 +22,25 @@ using namespace std;
 int main(){
     vector<string> filepath={"T1.csv"};
     
-    vector<int> sz={100,50,25,10};
-    vector<int> isz={2000,1000,500};
-    vector<int> exp={4,3,2};
-    vector<thread> workers;
-    for (int size:sz){
-        for (int init_size:isz){
-            for (int po: exp){
-                //actually the desktop we plan to train this model on only supports 8 threads
-                //thus it might seems more reasonable to use at most 16 threads
-                //but I didn't do so for code simplicity (although a thread pool seems neat)
-                CSVReader *csvr=new CSVReader(filepath,0.8);
-                thread toAdd(adjust_param, size, init_size, po, csvr);
-                workers.push_back(move(toAdd));
-            }
-        }
-    }
-    for (auto& th: workers){
-        th.join();
-    }
+   vector<int> sz={100,50,25,10};
+   vector<int> isz={2000,1000,500};
+   vector<int> exp={4,3,2};
+   vector<thread> workers;
+   for (int size:sz){
+       for (int init_size:isz){
+           for (int po: exp){
+               //actually the desktop we plan to train this model on only supports 8 threads
+               //thus it might seems more reasonable to use at most 16 threads
+               //but I didn't do so for code simplicity (although a thread pool seems neat)
+               CSVReader *csvr=new CSVReader(filepath,0.8);
+               thread toAdd(adjust_param, size, init_size, po, csvr);
+               workers.push_back(move(toAdd));
+           }
+       }
+   }
+   for (auto& th: workers){
+       th.join();
+   }
 
     get_past_results();
     trial_log active_min;
@@ -67,9 +68,13 @@ int main(){
 
     //save time by skipping disk IO and directly copying from memory
     CSVReader csvr(filepath,0.8);
-    CSVReader scsvr=csvr;
-    CSVReader tcsvr=csvr;
-    CSVReader fcsvr=csvr;
+    CSVReader scsvr(filepath,0.8);
+    CSVReader tcsvr(filepath,0.8);
+    CSVReader fcsvr(filepath,0.8);
+    CSVReader acsvr(filepath,0.8);
+    CSVReader bcsvr(filepath,0.8);
+    CSVReader ccsvr(filepath,0.8);
+    CSVReader dcsvr(filepath,0.8);
 
 
 
@@ -81,12 +86,24 @@ int main(){
     cout<<"First model tested"<<endl<<flush;
     cout<<"data recycled"<<endl<<flush;
 
+    model pact(&acsvr);
+    act.initialize(ginit_step);
+    cout<<acsvr.data->size()<<endl<<flush;
+    partial_test(pact,acsvr,2);
+    cout<<acsvr.data->size()<<"    "<<acsvr.used_data->size()<<"    "<<acsvr.test_data->size()<<endl<<flush;
+    cout<<"First model partial tested"<<endl<<flush;
+    cout<<"data recycled"<<endl<<flush;
 
     model rnd(&scsvr);
     rnd.setRandom();
     rnd.initialize(ginit_step);
     cout<<"second model initialized"<<endl<<flush;
     test(rnd,scsvr);
+
+    model prnd(&bcsvr);
+    prnd.setRandom();
+    prnd.initialize(ginit_step);
+    partial_test(prnd,bcsvr,2);
 
     gexp=random_min.exp;
     gweight=random_min.weight;
@@ -102,10 +119,19 @@ int main(){
     sact.initialize(ginit_step);
     test(sact,tcsvr);
 
+    model psact(&ccsvr);
+    psact.initialize(ginit_step);
+    partial_test(psact,ccsvr,2);
+
     model srnd(&fcsvr);
     srnd.setRandom();
     srnd.initialize(ginit_step);
     test(srnd,fcsvr);
+
+    model psrnd(&dcsvr);
+    psrnd.setRandom();
+    psrnd.initialize(ginit_step);
+    partial_test(psrnd,dcsvr,2);
 
     return 0;
 }
