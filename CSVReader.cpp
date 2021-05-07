@@ -157,9 +157,10 @@ void CSVReader::recycle(){
     for (vector<float> datum: *test_data){
         used_data->push_back(datum);
     }
-    test_data->clear();
+    delete test_data;
     data=used_data;
     this->used_data=new vector<vector<float>>();
+    this->test_data=new vector<vector<float>>();
     this->divide(0.8);
     this->randomize();
 }
@@ -175,7 +176,7 @@ Test CSVReader::getTestData(){
 }
 
 CSVReader::~CSVReader(){
-    this->data->clear();
-    this->used_data->clear();
-    this->test_data->clear();
+    delete this->data;
+    delete this->used_data;
+    delete this->test_data;
 }
